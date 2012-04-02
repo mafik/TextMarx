@@ -2,3 +2,4 @@
 *.pyo
 profile_results
 *~
+.#*
