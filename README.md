@@ -20,13 +20,6 @@ Planned Features
 * High performance & nice visual effects.
 * Modal interface.
 * Target platform: modern linux desktop.
-
-Philosophy?
------------
-
-* Focus on text editing. Everything else should be done by plugins.
-* Conform to modern desktop standards but provide standard mechanisms
-  for hackers.
  
 Requirements
 ------------

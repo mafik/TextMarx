@@ -77,7 +77,7 @@ class Marx.Scroller : Group {
 	}
 
 	private bool scroll_frame() {
-		stderr.printf("Velocity: %f  Force: %f  State: %s\n", velocity, force, scroll_state.to_string());
+		//stderr.printf("Velocity: %f  Force: %f  State: %s\n", velocity, force, scroll_state.to_string());
 
 		switch(scroll_state) {
 		case State.EXPONENTIAL:
@@ -95,7 +95,7 @@ class Marx.Scroller : Group {
 		case State.ELASTIC:
 			force = (destination - y)/4;
 			velocity += force;
-			velocity *= 0.7f;
+			velocity *= 0.6f;
 			y += (float)(int)velocity;
 			if(force * force + velocity * velocity > 1) {
 				return true;
