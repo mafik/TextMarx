@@ -1,65 +1,50 @@
 using Clutter;
 
 class Marx.Scroller : Group {
+
 	public Window master_window;
 
 	enum State {
+		STOPPED,
 		EXPONENTIAL,
 		ELASTIC,
 		DAMPED
 	}
 
-	public bool is_scrolling_forward;
-	public bool is_scrolling;
-
-	public int step;
-
+	public State scroll_state;
 	public Animator animator;
+	private uint handler;
+
+	// for exponential scrolling
+	public float velocity;
+	public float force;
+
+	// for elastic scrolling
+
+	// for damped scrolling
 
 	public Scroller(Window window) {
 		master_window = window;
+		scroll_state = State.STOPPED;
+		handler = 0;
 	}
 
 	public void scrolling(bool forward, bool state) {
-		if((is_scrolling == state) &&
-		   (is_scrolling_forward == forward)) return;
-		is_scrolling = state;
-		is_scrolling_forward = forward;
-		if(state) {
-			step = 0;
-			continue_scrolling();
-		} else {
-			stderr.printf("Ending!\n");
-			animator.timeline.stop();
-			
-		}
+		scroll_state = state ? EXPONENTIAL : STOPPED;
+		force = state ? (forward ? 1 : -1) : 0;
+		if(state) start();
 	}
 
-	private float get_step_size() {
-		return (float)(Math.pow(step, 2) + 10);
+	private void start() {
+		if(handler == 0)
+			handler = Threads.FrameSource.add(50, scroll_frame);
 	}
 
 	private bool scroll_frame() {
 		step += 1;
 		stderr.printf("Continuing towards %d with step %d\n", (int)is_scrolling_forward, step);
-		float new_y = y + (is_scrolling_forward ? -get_step_size() : get_step_size());
-		AnimationMode mode = (step == 1 ? AnimationMode.EASE_IN_QUAD : AnimationMode.LINEAR);
-
-		animator = new Animator();
-		
-		if(new_y > 0) {
-			animator.set_key(this, "y", mode, 0, y);
-			animator.set_key(this, "y", AnimationMode.EASE_OUT_ELASTIC, 1, (float)0);
-			animator.set_duration(500);
-		} else {
-			animator.set_key(this, "y", mode, 0, y);
-			animator.set_key(this, "y", mode, 1, (float)(int)new_y);
-			animator.set_duration(100);
-		}
-
-		
-		animator.timeline.completed.connect(continue_scrolling);
-		animator.start();
+		velocity += force;
+		y += velocity;
 	}
 	
 	public void show_debug() {
