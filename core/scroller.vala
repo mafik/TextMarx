@@ -4,6 +4,9 @@ class Marx.Scroller : Group {
 
 	public Window master_window;
 
+	private bool scrolling_up;
+	private bool scrolling_down;
+
 	public enum State {
 		STOPPED,
 		EXPONENTIAL,
@@ -28,19 +31,34 @@ class Marx.Scroller : Group {
 		master_window = window;
 		scroll_state = State.STOPPED;
 		handler = 0;
+		scrolling_up = scrolling_down = false;
+	}
+
+	public float get_max_scroll() {
+		return height - master_window.line_height;
 	}
 
 	public void scrolling(bool forward, bool state) {
-		if(scroll_state != State.STOPPED && state) return;
-
 		if(state) {
+			if(forward && scrolling_up) return;
+			if(!forward && scrolling_down) return;
+
+			if(forward) scrolling_up = true;
+			else scrolling_down = true;
+
 			scroll_state = State.EXPONENTIAL;
 			force = state ? (forward ? -1 : 1) : 0;
 			velocity += force * 10;
 			start();
-		} else if(scroll_state == State.EXPONENTIAL) {
-			scroll_state = State.STOPPED;
-			velocity = 0;
+		} else {
+
+			if(forward) scrolling_up = false;
+			else scrolling_down = false;
+
+			if(scroll_state == State.EXPONENTIAL) {
+				scroll_state = State.STOPPED;
+				velocity = 0;
+			}
 		}
 	}
 
@@ -61,33 +79,43 @@ class Marx.Scroller : Group {
 	private bool scroll_frame() {
 		stderr.printf("Velocity: %f  Force: %f  State: %s\n", velocity, force, scroll_state.to_string());
 
-		if(scroll_state == State.EXPONENTIAL) {
+		switch(scroll_state) {
+		case State.EXPONENTIAL:
 			velocity += force;
 			velocity *= 1.01f;
 			y += (float)(int)velocity;
 			if(y > 0) {
 				destination = 0;
 				scroll_state = State.ELASTIC;
-			} else if(y < -height + 50) {
-				destination = -height + 50;
+			} else if(y < -get_max_scroll()) {
+				destination = -get_max_scroll();
 				scroll_state = State.ELASTIC;
 			}
 			return true;
-		} else if(scroll_state == State.ELASTIC) {
-			force = (destination - y)/2;
+		case State.ELASTIC:
+			force = (destination - y)/4;
 			velocity += force;
 			velocity *= 0.7f;
 			y += (float)(int)velocity;
 			if(force * force + velocity * velocity > 1) {
 				return true;
 			} else {
-				stderr.printf("Elastic ended!\n");
 				y = (float)(int)destination;
-				return end();
 			}
-		} else {
-			return end();
+			break;
+		case State.DAMPED:
+			float distance = (destination - y) / 4;
+
+			y += (float)(int) distance;
+
+			if(distance*distance >= 1) {
+				return true;
+			} else {
+				y = (float)(int)destination;
+			}
+			break;
 		}
+		return end();
 	}
 	
 	public void show_debug() {
@@ -100,12 +128,42 @@ class Marx.Scroller : Group {
 	//public void scroll_to_row(int row) {
 	//}
 
-	//public enum StepSize {
-	//LINE,
-	//A_FEW_LINES,
-	//PAGE
-	//}
+	public void scroll_home() {
+		scroll_state = State.ELASTIC;
+		destination = 0;
+		start();
+	}
 
-	//public void scroll_step() {	
-	//}
+	public void scroll_end() {
+		scroll_state = State.ELASTIC;
+		destination = -get_max_scroll();
+		start();
+	}
+
+	public enum StepSize {
+		LINE,
+		A_FEW_LINES,
+		PAGE
+	}
+
+	public void scroll_step(bool forward, StepSize step_size) {
+		if((scroll_state != State.DAMPED) &&
+		   (scroll_state != State.ELASTIC)) {
+			destination = y;
+		}
+		scroll_state = State.DAMPED;
+		switch(step_size) {
+		case StepSize.LINE:
+			destination += master_window.line_height * (forward ? -1 : 1);
+			break;
+		case StepSize.A_FEW_LINES:
+			destination += master_window.line_height * 5 * (forward ? -1 : 1);
+			break;
+		case StepSize.PAGE:
+			destination += master_window.stage.height * (forward ? -1 : 1);
+			break;
+		}
+		destination = destination.clamp(-get_max_scroll(), 0);
+		start();
+	}
 }

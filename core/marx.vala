@@ -37,6 +37,7 @@ class Marx.Window : Object {
 
 		stage.key_press_event.connect(handle_key_press);
 		stage.key_release_event.connect(handle_key_release);
+		stage.scroll_event.connect(handle_scroll_event);
 	}
 
 	private void init_debug() {
@@ -72,6 +73,10 @@ class Marx.Window : Object {
 			scroller.scrolling(false, true);
 		} else if(event.keyval == Key.Page_Down) {
 			scroller.scrolling(true, true);
+		} else if(event.keyval == Key.Home) {
+			scroller.scroll_home();
+		} else if(event.keyval == Key.End) {
+			scroller.scroll_end();
 		} else if(event.keyval == Key.space) {
 			scroller.show_debug();
 		} else {
@@ -90,7 +95,24 @@ class Marx.Window : Object {
 	}
 
 	public void debug_key_event(KeyEvent event) {
-		stderr.printf("Got key event:\n modifiers %ux\n", (uint)event.modifier_state);
+		stderr.printf("Got %s:\n", event.type.to_string());
+		stderr.printf("    time %u\n", event.time);
+		stderr.printf("    flags 0x%02x\n", (uint)event.flags);
+		stderr.printf("    modifiers 0x%02x\n", (uint)event.modifier_state);
+		stderr.printf("    keyval 0x%02x\n", event.keyval);
+		stderr.printf("    hard-keycode 0x%02x\n", (uint)event.hardware_keycode);
+	}
+
+	public bool handle_scroll_event(ScrollEvent event) {
+		bool forward = (event.direction == ScrollDirection.DOWN);
+		scroller.scroll_step(forward, Scroller.StepSize.A_FEW_LINES);
+		return true;
+	}
+
+	public int line_height {
+		get {
+			return 15;
+		}
 	}
 
 	public Stage stage;
