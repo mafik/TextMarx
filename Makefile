@@ -1,4 +1,4 @@
 all : marx
 
 marx : marx.vala
-	valac $<
+	valac $< --pkg clutter-1.0 --pkg gee-1.0

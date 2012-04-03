@@ -69,3 +69,16 @@ Tech
 * Vala core
   * Bindings in: cpython, v8, ruby
 
+Modes
+-----
+
+* Read
+   * Narrowing
+   * Scrolling
+   * Searching
+   * Navigating
+* Eval (Read)
+* Write (Read)
+   * Multiple cursors, selections
+   * Structure navigation
+* C, JavaScript, Python, ...
