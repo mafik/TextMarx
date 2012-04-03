@@ -23,7 +23,7 @@ class Marx.Window : Object {
 		stage.title = "Te✯tMarx";
 		stage.show_all();
 
-		scroller = new Group();
+		scroller = new Scroller(this);
 		stage.add_actor(scroller);
 
 		text = new Text.full ("Droid Sans Mono 10",
@@ -36,6 +36,7 @@ class Marx.Window : Object {
 		cursors = new LinkedList<Cursor>();
 
 		stage.key_press_event.connect(handle_key_press);
+		stage.key_release_event.connect(handle_key_release);
 	}
 
 	private void init_debug() {
@@ -65,24 +66,36 @@ class Marx.Window : Object {
 	}
 
 	public bool handle_key_press(KeyEvent event) {
-		//stderr.printf("%ud\n", (uint)event.modifier_state);
 		if(event.keyval == Key.Escape) {
 			main_quit();
-		} /*else if(event.keyval == Key.Right) {
-			foreach(Cursor c in cursors) {
-				c.offset++;
-			}
-		} else if(event.keyval == Key.Left) {
-			foreach(Cursor c in cursors) {
-				c.offset--;
-			}
-			}*/
+		} else if(event.keyval == Key.Page_Up) {
+			scroller.scrolling(false, true);
+		} else if(event.keyval == Key.Page_Down) {
+			scroller.scrolling(true, true);
+		} else if(event.keyval == Key.space) {
+			scroller.show_debug();
+		} else {
+			debug_key_event(event);
+		}
 		return true;
+	}
+
+	public bool handle_key_release(KeyEvent event) {
+		if(event.keyval == Key.Page_Up) {
+			scroller.scrolling(false, false);
+		} else if(event.keyval == Key.Page_Down) {
+			scroller.scrolling(true, false);
+		}
+		return true;
+	}
+
+	public void debug_key_event(KeyEvent event) {
+		stderr.printf("Got key event:\n modifiers %ux\n", (uint)event.modifier_state);
 	}
 
 	public Stage stage;
 	public Theme theme;
-	public Group scroller;
+	public Scroller scroller;
 	public Text text;
 	public LinkedList<Cursor> cursors;
 	

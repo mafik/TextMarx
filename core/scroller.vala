@@ -4,7 +4,7 @@ class Marx.Scroller : Group {
 
 	public Window master_window;
 
-	enum State {
+	public enum State {
 		STOPPED,
 		EXPONENTIAL,
 		ELASTIC,
@@ -12,7 +12,7 @@ class Marx.Scroller : Group {
 	}
 
 	public State scroll_state;
-	public Animator animator;
+	//public Animator animator;
 	private uint handler;
 
 	// for exponential scrolling
@@ -20,6 +20,7 @@ class Marx.Scroller : Group {
 	public float force;
 
 	// for elastic scrolling
+	public float destination;
 
 	// for damped scrolling
 
@@ -30,9 +31,17 @@ class Marx.Scroller : Group {
 	}
 
 	public void scrolling(bool forward, bool state) {
-		scroll_state = state ? EXPONENTIAL : STOPPED;
-		force = state ? (forward ? 1 : -1) : 0;
-		if(state) start();
+		if(scroll_state != State.STOPPED && state) return;
+
+		if(state) {
+			scroll_state = State.EXPONENTIAL;
+			force = state ? (forward ? -1 : 1) : 0;
+			velocity += force * 10;
+			start();
+		} else if(scroll_state == State.EXPONENTIAL) {
+			scroll_state = State.STOPPED;
+			velocity = 0;
+		}
 	}
 
 	private void start() {
@@ -40,11 +49,45 @@ class Marx.Scroller : Group {
 			handler = Threads.FrameSource.add(50, scroll_frame);
 	}
 
+	// Invoke only as a return value from scroll_frame!
+	private bool end() {
+		scroll_state = State.STOPPED;
+		force = 0;
+		velocity = 0;
+		handler = 0;
+		return false;
+	}
+
 	private bool scroll_frame() {
-		step += 1;
-		stderr.printf("Continuing towards %d with step %d\n", (int)is_scrolling_forward, step);
-		velocity += force;
-		y += velocity;
+		stderr.printf("Velocity: %f  Force: %f  State: %s\n", velocity, force, scroll_state.to_string());
+
+		if(scroll_state == State.EXPONENTIAL) {
+			velocity += force;
+			velocity *= 1.01f;
+			y += (float)(int)velocity;
+			if(y > 0) {
+				destination = 0;
+				scroll_state = State.ELASTIC;
+			} else if(y < -height + 50) {
+				destination = -height + 50;
+				scroll_state = State.ELASTIC;
+			}
+			return true;
+		} else if(scroll_state == State.ELASTIC) {
+			force = (destination - y)/2;
+			velocity += force;
+			velocity *= 0.7f;
+			y += (float)(int)velocity;
+			if(force * force + velocity * velocity > 1) {
+				return true;
+			} else {
+				stderr.printf("Elastic ended!\n");
+				y = (float)(int)destination;
+				return end();
+			}
+		} else {
+			return end();
+		}
 	}
 	
 	public void show_debug() {
