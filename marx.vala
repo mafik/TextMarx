@@ -3,7 +3,7 @@ using Gee;
 
 class Marx.Theme : Object {
 	public Color background {
-		get; set; default = Color.from_hls( 0, 1, 1 );
+		get; set; default = Color.from_pixel( (uint32) 0xedecebff );
 	}
 
 	public Color background_light {
@@ -11,7 +11,7 @@ class Marx.Theme : Object {
 	}
 
 	public Color text {
-		get; set; default = Color.from_hls( 0, 0, 1 );
+		get; set; default = Color.from_pixel( (uint32) 0x3f3f3fff );
 	}
 
 	public Color cursor {
@@ -107,9 +107,6 @@ class Marx.Window : Object {
 
 		Cursor c = new Cursor(this);
 		c.offset = 100;
-
-		c = new Cursor(this);
-		c.offset = 50;
 	}
 
 	public Window() {
@@ -135,7 +132,7 @@ class Marx.Window : Object {
 		//stderr.printf("%ud\n", (uint)event.modifier_state);
 		if(event.keyval == Key.Escape) {
 			main_quit();
-		} else if(event.keyval == Key.Right) {
+		} /*else if(event.keyval == Key.Right) {
 			foreach(Cursor c in cursors) {
 				c.offset++;
 			}
@@ -143,7 +140,7 @@ class Marx.Window : Object {
 			foreach(Cursor c in cursors) {
 				c.offset--;
 			}
-		}
+			}*/
 		return true;
 	}
 
