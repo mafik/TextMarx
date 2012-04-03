@@ -112,6 +112,7 @@ class Marx.Window : Object {
 	public int line_height {
 		get {
 			return 15;
+			// FIXME!
 		}
 	}
 
