@@ -103,7 +103,7 @@ class Marx.Window : Object {
 	}
 
 	private void init_debug() {
-		open_file("marx.vala");
+		open_file("README.md");
 
 		Cursor c = new Cursor(this);
 		c.offset = 100;
