@@ -117,14 +117,14 @@ class Marx.Scroller : Group {
 		}
 		return end();
 	}
-	
+	/*
 	public void show_debug() {
 		stderr.puts("Scroller state:\n");
 		stderr.printf("    x: %.1f \t y: %.1f\n", x, y);
 		stderr.printf("    w: %.1f \t h: %.1f\n", width, height);
 		
 	}
-
+	*/
 	//public void scroll_to_row(int row) {
 	//}
 

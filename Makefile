@@ -2,7 +2,8 @@ SOURCES=\
   core/Marx.vala\
   core/Theme.vala\
   core/Cursor.vala\
-  core/Scroller.vala
+  core/Scroller.vala\
+  core/History.vala
 
 all : marx
 

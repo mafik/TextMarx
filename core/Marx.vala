@@ -38,6 +38,8 @@ class Marx.Window : Object {
 		stage.key_press_event.connect(handle_key_press);
 		stage.key_release_event.connect(handle_key_release);
 		stage.scroll_event.connect(handle_scroll_event);
+
+		history = new History();
 	}
 
 	private void init_debug() {
@@ -67,6 +69,8 @@ class Marx.Window : Object {
 	}
 
 	public bool handle_key_press(KeyEvent event) {
+		unichar c = event.unicode_value;
+
 		if(event.keyval == Key.Escape) {
 			main_quit();
 		} else if(event.keyval == Key.Page_Up) {
@@ -77,8 +81,18 @@ class Marx.Window : Object {
 			scroller.scroll_home();
 		} else if(event.keyval == Key.End) {
 			scroller.scroll_end();
-		} else if(event.keyval == Key.space) {
-			scroller.show_debug();
+		} else if(event.keyval == Key.BackSpace) {
+			Action a = new Actions.Backspace();
+			a.make(text, cursors.first());
+			history.add(a);
+		} else if(event.keyval == Key.Delete) {
+			Action a = new Actions.Delete();
+			a.make(text, cursors.first());
+			history.add(a);
+		} else if(c.isprint() || c.isspace()) {
+			Action a = new Actions.Unicode(c);
+			a.make(text, cursors.first());
+			history.add(a);
 		} else {
 			debug_key_event(event);
 		}
@@ -95,12 +109,16 @@ class Marx.Window : Object {
 	}
 
 	public void debug_key_event(KeyEvent event) {
+		unichar c = event.unicode_value;
+
 		stderr.printf("Got %s:\n", event.type.to_string());
-		stderr.printf("    time %u\n", event.time);
-		stderr.printf("    flags 0x%02x\n", (uint)event.flags);
-		stderr.printf("    modifiers 0x%02x\n", (uint)event.modifier_state);
-		stderr.printf("    keyval 0x%02x\n", event.keyval);
-		stderr.printf("    hard-keycode 0x%02x\n", (uint)event.hardware_keycode);
+		stderr.printf("\ttime %u\n", event.time);
+		stderr.printf("\tflags 0x%02x\n", (uint)event.flags);
+		stderr.printf("\tmodifiers 0x%02x\n", (uint)event.modifier_state);
+		stderr.printf("\tkeyval 0x%02x\n", event.keyval);
+		stderr.printf("\thard-keycode 0x%02x\n", (uint)event.hardware_keycode);
+		print(@"\tvalidate: $(c.validate())\n");
+		print(@"\tiscntrl: $(c.iscntrl())\n");
 	}
 
 	public bool handle_scroll_event(ScrollEvent event) {
@@ -121,5 +139,6 @@ class Marx.Window : Object {
 	public Scroller scroller;
 	public Text text;
 	public LinkedList<Cursor> cursors;
+	public History history;
 	
 }

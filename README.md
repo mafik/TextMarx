@@ -10,7 +10,7 @@ Running
 
     git clone git://github.com/mafik/TextMarx.git
     cd TextMarx
-    ./marx
+    make && ./marx
 
 Planned Features
 ----------------
@@ -18,7 +18,7 @@ Planned Features
 * Fully programmable (configuration, plugins, macros).
 * Wide range of programming languages (through GObject introspection).
 * High performance & nice visual effects.
-* Modal interface.
+* Quasi-modal interface.
 * Target platform: modern linux desktop.
  
 Requirements
